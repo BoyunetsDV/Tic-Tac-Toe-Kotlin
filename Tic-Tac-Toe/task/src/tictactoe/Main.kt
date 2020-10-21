@@ -5,52 +5,42 @@ import kotlin.math.abs
 
 val scanner = Scanner(System.`in`)
 var grid = arrayOf(
-        charArrayOf('_', '_', '_'),
-        charArrayOf('_', '_', '_'),
-        charArrayOf('_', '_', '_')
+        charArrayOf(' ', ' ', ' '),
+        charArrayOf(' ', ' ', ' '),
+        charArrayOf(' ', ' ', ' ')
 )
 var result = ""
+var isGameFinished = false
+var currentPlayer = ' '
 
 fun main() {
-    val values = scanner.nextLine()
-    fillGridWithValues(values)
     displayGrid()
-    makeMove()
-    displayGrid()
-    calculateResult()
+    while(!isGameFinished) {
+        makeMove()
+        displayGrid()
+        calculateResult()
+    }
     displayResult()
 }
 
 fun calculateResult() {
     val oCount = grid.map { it.count { it == 'O' } }.sum()
     val xCount = grid.map { it.count { it == 'X' } }.sum()
-    val drawCount = grid.map { it.count { it == '_' } }.sum()
-    val xWins = checkIfUserWin('X')
-    val oWins = checkIfUserWin('O')
+    val drawCount = grid.map { it.count { it == ' ' } }.sum()
+    val wins = checkIfUserWin(currentPlayer)
 
-    result = if (abs(oCount - xCount) > 1 || xWins && oWins) {
+    result = if (abs(oCount - xCount) > 1) {
+        isGameFinished = true
         "Impossible"
-    } else if (xWins) {
-        "X wins"
-    } else if (oWins) {
-        "O wins"
+    } else if (wins) {
+        isGameFinished = true
+        "$currentPlayer wins"
     } else if (drawCount == 0) {
+        isGameFinished = true
         "Draw"
     } else {
         "Game not finished"
     }
-}
-
-fun fillGridWithValues(values: String) {
-    grid[0][0] = values[0]
-    grid[0][1] = values[1]
-    grid[0][2] = values[2]
-    grid[1][0] = values[3]
-    grid[1][1] = values[4]
-    grid[1][2] = values[5]
-    grid[2][0] = values[6]
-    grid[2][1] = values[7]
-    grid[2][2] = values[8]
 }
 
 fun checkIfUserWin(symbol: Char): Boolean {
@@ -80,6 +70,12 @@ fun displayResult() {
 }
 
 fun makeMove() {
+    currentPlayer = if (currentPlayer == ' ' || currentPlayer == 'O') {
+        'X'
+    } else {
+        'O'
+    }
+
     do {
         print("Enter the coordinates: ")
         val x = scanner.next()
@@ -88,7 +84,7 @@ fun makeMove() {
         if (!isValidCoordinates) {
             continue
         }
-        grid[x.toInt() - 1][y.toInt() - 1] = 'X'
+        grid[x.toInt() - 1][y.toInt() - 1] = currentPlayer
     } while (!isValidCoordinates)
 }
 
@@ -102,7 +98,7 @@ fun isValidateCoordinates(x: String, y: String): Boolean {
             println("Coordinates should be from 1 to 3!")
             false
         }
-        grid[x.toInt() - 1][y.toInt() - 1] != '_' -> {
+        grid[x.toInt() - 1][y.toInt() - 1] != ' ' -> {
             println("This cell is occupied! Choose another one!")
             false
         }

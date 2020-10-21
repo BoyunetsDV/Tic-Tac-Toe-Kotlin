@@ -1,27 +1,34 @@
 package tictactoe
 
 import java.util.*
-import kotlin.math.absoluteValue
+import kotlin.math.abs
+
+val scanner = Scanner(System.`in`)
+var grid = arrayOf(
+        charArrayOf('_', '_', '_'),
+        charArrayOf('_', '_', '_'),
+        charArrayOf('_', '_', '_')
+)
+var result = ""
 
 fun main() {
-    val scanner = Scanner(System.`in`)
     val values = scanner.nextLine()
-    println("---------")
-    println("| ${values[0]} ${values[1]} ${values[2]} |")
-    println("| ${values[3]} ${values[4]} ${values[5]} |")
-    println("| ${values[6]} ${values[7]} ${values[8]} |")
-    println("---------")
-    println(getResult(values))
+    fillGridWithValues(values)
+    displayGrid()
+    makeMove()
+    displayGrid()
+    calculateResult()
+    displayResult()
 }
 
-fun getResult(values: String): String {
-    val oCount = values.count { it == 'O' }
-    val xCount = values.count { it == 'X' }
-    val drawCount = values.count { it == '_' }
-    val xWins = checkIfUserWin('X', values)
-    val oWins = checkIfUserWin('O', values)
+fun calculateResult() {
+    val oCount = grid.map { it.count { it == 'O' } }.sum()
+    val xCount = grid.map { it.count { it == 'X' } }.sum()
+    val drawCount = grid.map { it.count { it == '_' } }.sum()
+    val xWins = checkIfUserWin('X')
+    val oWins = checkIfUserWin('O')
 
-    return if ((oCount - xCount).absoluteValue > 1 || xWins && oWins) {
+    result = if (abs(oCount - xCount) > 1 || xWins && oWins) {
         "Impossible"
     } else if (xWins) {
         "X wins"
@@ -34,16 +41,71 @@ fun getResult(values: String): String {
     }
 }
 
-fun checkIfUserWin(symbol: Char, values: String): Boolean {
+fun fillGridWithValues(values: String) {
+    grid[0][0] = values[0]
+    grid[0][1] = values[1]
+    grid[0][2] = values[2]
+    grid[1][0] = values[3]
+    grid[1][1] = values[4]
+    grid[1][2] = values[5]
+    grid[2][0] = values[6]
+    grid[2][1] = values[7]
+    grid[2][2] = values[8]
+}
+
+fun checkIfUserWin(symbol: Char): Boolean {
     return when {
-        values[0] == values[1] && values[0] == values[2] && values[0] == symbol -> true
-        values[3] == values[4] && values[3] == values[5] && values[3] == symbol -> true
-        values[6] == values[7] && values[6] == values[8] && values[6] == symbol -> true
-        values[0] == values[3] && values[0] == values[6] && values[0] == symbol -> true
-        values[1] == values[4] && values[1] == values[7] && values[1] == symbol -> true
-        values[2] == values[5] && values[2] == values[8] && values[2] == symbol -> true
-        values[0] == values[4] && values[0] == values[8] && values[0] == symbol -> true
-        values[6] == values[4] && values[6] == values[2] && values[6] == symbol -> true
+        grid[0][0] == grid[0][1] && grid[0][0] == grid[0][2] && grid[0][0] == symbol -> true
+        grid[1][0] == grid[1][1] && grid[1][0] == grid[1][2] && grid[1][0] == symbol -> true
+        grid[2][0] == grid[2][1] && grid[2][0] == grid[2][2] && grid[2][0] == symbol -> true
+        grid[0][0] == grid[1][0] && grid[0][0] == grid[2][0] && grid[0][0] == symbol -> true
+        grid[0][1] == grid[1][1] && grid[0][1] == grid[2][1] && grid[0][1] == symbol -> true
+        grid[0][2] == grid[1][2] && grid[0][2] == grid[2][2] && grid[0][2] == symbol -> true
+        grid[0][0] == grid[1][1] && grid[0][0] == grid[2][2] && grid[0][0] == symbol -> true
+        grid[2][0] == grid[1][1] && grid[2][0] == grid[0][2] && grid[2][0] == symbol -> true
         else -> false
+    }
+}
+
+fun displayGrid() {
+    println("---------")
+    println("| ${grid[0][0]} ${grid[0][1]} ${grid[0][2]} |")
+    println("| ${grid[1][0]} ${grid[1][1]} ${grid[1][2]} |")
+    println("| ${grid[2][0]} ${grid[2][1]} ${grid[2][2]} |")
+    println("---------")
+}
+
+fun displayResult() {
+    println(result)
+}
+
+fun makeMove() {
+    do {
+        print("Enter the coordinates: ")
+        val x = scanner.next()
+        val y = scanner.next()
+        val isValidCoordinates = isValidateCoordinates(x, y)
+        if (!isValidCoordinates) {
+            continue
+        }
+        grid[x.toInt() - 1][y.toInt() - 1] = 'X'
+    } while (!isValidCoordinates)
+}
+
+fun isValidateCoordinates(x: String, y: String): Boolean {
+    return when {
+        x.length != 1 || y.length != 1 || !x[0].isDigit() || !y[0].isDigit() -> {
+            println("You should enter numbers!")
+            false
+        }
+        x.toInt() !in 1..3 || y.toInt() !in 1..3 -> {
+            println("Coordinates should be from 1 to 3!")
+            false
+        }
+        grid[x.toInt() - 1][y.toInt() - 1] != '_' -> {
+            println("This cell is occupied! Choose another one!")
+            false
+        }
+        else -> true
     }
 }
